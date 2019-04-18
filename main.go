@@ -8,17 +8,17 @@ import (
 
 func main() {
 	c := boring("Joe")
+	timeout := time.After(5 * time.Second)
 	for {
 		select {
 		case s := <-c:
 			fmt.Println(s)
-		case <-time.After(1 * time.Second):
-			fmt.Println("You're too slow.")
+		case <-timeout:
+			fmt.Println("You talk too much.")
 			return
 		}
 	}
 }
-
 func boring(msg string) <-chan string { // Returns receive-only channel of strings.
 	c := make(chan string)
 	go func() { // We launch the goroutine from inside the function.
