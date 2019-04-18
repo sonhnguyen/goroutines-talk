@@ -12,21 +12,31 @@ func main() {
 	results := searchVNExpress()
 	elapsed := time.Since(start)
 	fmt.Println(results)
+	fmt.Println("results: ", len(results))
 	fmt.Println(elapsed)
 
 }
 
 func searchVNExpress() []Article {
 	var results []Article
+	c := make(chan []Article)
 
 	categories, err := crawlVNExpressCategory()
 	checkError(err)
 
 	for category, url := range categories {
-		resultsEachCategory, err := crawlVNExpress(category, url)
-		checkError(err)
-		results = append(results, resultsEachCategory...)
+		go func() {
+			resultsEachCategory, err := crawlVNExpress(category, url)
+			checkError(err)
+			c <- resultsEachCategory
+		}()
 	}
+
+	for i := 0; i < len(categories); i++ {
+		result := <-c
+		results = append(results, result...)
+	}
+
 	return results
 }
 
