@@ -32,9 +32,15 @@ func searchVNExpress() []Article {
 		}()
 	}
 
+	timeout := time.After(200 * time.Millisecond)
 	for i := 0; i < len(categories); i++ {
-		result := <-c
-		results = append(results, result...)
+		select {
+		case result := <-c:
+			results = append(results, result...)
+		case <-timeout:
+			fmt.Println("timed out")
+			return results
+		}
 	}
 
 	return results
