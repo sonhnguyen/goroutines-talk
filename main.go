@@ -7,31 +7,31 @@ import (
 )
 
 func main() {
-	quit := make(chan bool)
-	c := boring("Joe", quit)
-	for i := rand.Intn(10); i >= 0; i-- {
-		fmt.Println(<-c)
-	}
+	rand.Seed(time.Now().UnixNano())
+	start := time.Now()
+	results := searchVNExpress()
+	elapsed := time.Since(start)
+	fmt.Println(results)
+	fmt.Println(elapsed)
 
-	for {
-		select {
-		case s := <-c:
-			fmt.Println(s)
-		case <-quit:
-			fmt.Println("You talk too much. Quit signal")
-			return
-		}
-	}
 }
 
-func boring(msg string, quit chan bool) <-chan string { // Returns receive-only channel of strings.
-	c := make(chan string)
-	go func() { // We launch the goroutine from inside the function.
-		for i := 0; i < 5; i++ {
-			c <- fmt.Sprintf("%s %d", msg, i)
-			time.Sleep(time.Duration(rand.Intn(1e3)) * time.Millisecond)
-		}
-		quit <- true
-	}()
-	return c // Return the channel to the caller.
+func searchVNExpress() []Article {
+	var results []Article
+
+	categories, err := crawlVNExpressCategory()
+	checkError(err)
+
+	for category, url := range categories {
+		resultsEachCategory, err := crawlVNExpress(category, url)
+		checkError(err)
+		results = append(results, resultsEachCategory...)
+	}
+	return results
+}
+
+func checkError(err error) {
+	if err != nil {
+		fmt.Println(err)
+	}
 }
