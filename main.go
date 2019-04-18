@@ -7,11 +7,13 @@ import (
 )
 
 func main() {
-	c := boring("boring!") // Function returning a channel.
+	joe := boring("Joe")
+	ann := boring("Ann")
 	for i := 0; i < 5; i++ {
-		fmt.Printf("You say: %q\n", <-c)
+		fmt.Println(<-joe)
+		fmt.Println(<-ann)
 	}
-	fmt.Println("You're boring; I'm leaving.")
+	fmt.Println("You're both boring; I'm leaving.")
 }
 
 func boring(msg string) <-chan string { // Returns receive-only channel of strings.
